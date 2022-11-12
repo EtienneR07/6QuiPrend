@@ -1,0 +1,9 @@
+**/bin/**
+**/obj/**
+**/Express/**
+packages/
+**/.vs/
+**/*.suo
+**/*.user
+**/*.orig
+**/*.rej
