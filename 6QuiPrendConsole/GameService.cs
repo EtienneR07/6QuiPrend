@@ -5,10 +5,9 @@ namespace _6QuiPrendConsole
 {
     public class GameService
     {
-
         private int EndingScore;
 
-        private List<Player> Players = new();
+        public List<Player> Players = new();
         private Stack<Card> CardDeck = new();
         private Dictionary<int, Stack<Card>> Stacks = new();
         private Dictionary<Guid, List<int>> PlayerCardsDictionary = new();
@@ -25,20 +24,24 @@ namespace _6QuiPrendConsole
 
         public List<Player> PlayGame()
         {
+            foreach (var player in Players)
+            {
+                player.Score = 0;
+            }
             while (!HasALoser())
             {
                 if (Players.Any(x => x.Strategy.Cards.Count == 0))
                 {
                     Reset();
                     GenerateDeck();
-                    SetupStacks();
                     DistributeCards();
+                    SetupStacks();
                 }
-                
+
                 var turnCards = new Dictionary<Player, Card>();
                 foreach (var player in Players)
                 {
-                    var chosenCard = player.Strategy.GetChosenCard();
+                    var chosenCard = player.Strategy.GetChosenCard(GetCurrentGameState());
 
                     if (!PlayerCardsDictionary.ContainsKey(player.Id)
                         || !PlayerCardsDictionary[player.Id].Contains(chosenCard.Number))
@@ -53,27 +56,42 @@ namespace _6QuiPrendConsole
 
                 foreach (var playerWithCard in playerOrder)
                 {
-                    var stackId = playerWithCard.Key.Strategy.ChoseStack(playerWithCard.Value);
-
-                    if (!ValidChoice(stackId, playerWithCard.Value.Number))
-                        throw new InvalidOperationException("Chosen stack is invalid according to the rules");
-
-                    PlaceCard(stackId, playerWithCard);
-
-                    foreach (var player in Players)
-                    {
-                        player.Strategy.UpdateStack(stackId, new Stack<Card>(Stacks[stackId]));
-                    }
+                    if (CanPlaceCard(playerWithCard))
+                        PlaceCard(playerWithCard);
+                    else
+                        BuyStack(playerWithCard, playerWithCard.Key.Strategy.GetChosenStack(GetCurrentGameState()));
                 }
-
             }
 
             return Players;
         }
 
-        private void PlaceCard(int stackId, KeyValuePair<Player, Card> playerWithCard)
+        private void BuyStack(KeyValuePair<Player, Card> playerWithCard, int chosenStack)
         {
-            if (Stacks[stackId].Count == 5 || Stacks[stackId].Peek().Number > playerWithCard.Value.Number)
+            var points = Stacks[chosenStack].Sum(s => s.Bullheads);
+            playerWithCard.Key.Score += points;
+            Stacks[chosenStack].Clear();
+            Stacks[chosenStack].Push(playerWithCard.Value);
+        }
+
+        private IEnumerable<GameStack> GetCurrentGameState()
+        {
+            return Stacks.Select(s => new GameStack(s));
+        }
+
+
+        private bool CanPlaceCard(KeyValuePair<Player, Card> playerWithCard)
+        {
+            return Stacks.Any(s => s.Value.Peek().Number > playerWithCard.Value.Number);
+        }
+
+        private void PlaceCard(KeyValuePair<Player, Card> playerWithCard)
+        {
+            var stackId = Stacks.OrderBy(s => s.Value.Peek().Number)
+                .First(s => s.Value.Peek().Number > playerWithCard.Value.Number)
+                .Key;
+
+            if (Stacks[stackId].Count == 5)
             {
                 var points = Stacks[stackId].Sum(s => s.Bullheads);
                 playerWithCard.Key.Score += points;
@@ -83,26 +101,6 @@ namespace _6QuiPrendConsole
             Stacks[stackId].Push(playerWithCard.Value);
         }
 
-        private bool ValidChoice(int stackId, int chosenCardNumber)
-        {
-            var topCards = new Dictionary<int, Card>();
-            foreach (var stack in Stacks)
-            {
-                topCards.Add(stack.Key, stack.Value.Peek());
-            }
-
-            if (topCards.All(tc => tc.Value.Number > chosenCardNumber)) return true;
-
-            var onlyValidStackId = topCards
-                .ToDictionary(x => x.Key, x => chosenCardNumber - x.Value.Number)
-                .OrderBy(x => x.Value)
-                .Select(x => x.Key)
-                .FirstOrDefault();
-
-            if (stackId != onlyValidStackId) return false;
-
-            return true;
-        }
 
         private void GenerateDeck()
         {
@@ -136,6 +134,7 @@ namespace _6QuiPrendConsole
 
                 deckList.Add(card);
             }
+
             var rng = new Random();
             deckList = deckList.OrderBy(c => rng.Next()).ToList();
             CardDeck = new Stack<Card>(deckList);
@@ -200,6 +199,22 @@ namespace _6QuiPrendConsole
             CardDeck = new Stack<Card>();
             Stacks = new Dictionary<int, Stack<Card>>();
             PlayerCardsDictionary = new Dictionary<Guid, List<int>>();
+        }
+    }
+
+    public class GameStack
+    {
+        public int TopCard;
+        public int CardCount;
+        public int StackValue;
+        public int StackId;
+
+        public GameStack(KeyValuePair<int, Stack<Card>> cardStack)
+        {
+            StackId = cardStack.Key;
+            TopCard = cardStack.Value.Peek().Number;
+            CardCount = cardStack.Value.Count;
+            StackValue = cardStack.Value.Sum(c => c.Bullheads);
         }
     }
 }

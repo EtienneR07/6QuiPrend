@@ -8,12 +8,17 @@ namespace _6QuiPrendConsole.Strategies
         {
         }
 
-        public override Card GetChosenCard()
+        public override Card GetChosenCard(IEnumerable<GameStack> tuples)
         {
             throw new NotImplementedException();
         }
 
         public override int ChoseStack(Card card)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetChosenStack(IEnumerable<GameStack> getCurrentGameState)
         {
             throw new NotImplementedException();
         }

@@ -8,7 +8,7 @@ namespace _6QuiPrendConsole.Strategies
         {
         }
 
-        public override Card GetChosenCard()
+        public override Card GetChosenCard(IEnumerable<GameStack> tuples)
         {
             var chosenCard = Cards.FirstOrDefault();
 
@@ -32,6 +32,11 @@ namespace _6QuiPrendConsole.Strategies
                 .OrderBy(x => x.Value)
                 .Select(x => x.Key)
                 .FirstOrDefault();
+        }
+
+        public override int GetChosenStack(IEnumerable<GameStack> getCurrentGameState)
+        {
+            return 1;
         }
     }
 }
