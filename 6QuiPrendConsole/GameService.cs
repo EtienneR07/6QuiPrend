@@ -17,7 +17,7 @@ namespace _6QuiPrendConsole
             EndingScore = endingScore;
 
             Players.Add(new Player("Etienne", new NaiveStrategy(2)));
-            Players.Add(new Player("Etienne 2", new NaiveStrategy(2)));
+            Players.Add(new Player("Etienne 2", new AlexStrategy(2)));
 
             PlayerCardsDictionary = Players.ToDictionary(p => p.Id, p => new List<int>());
         }

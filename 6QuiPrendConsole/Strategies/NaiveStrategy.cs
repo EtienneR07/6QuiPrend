@@ -15,7 +15,7 @@ namespace _6QuiPrendConsole.Strategies
             return chosenCard;
         }
 
-        public override int ChoseStack(Card card)
+        public virtual int ChoseStack(Card card)
         {
             var number = card.Number;
 

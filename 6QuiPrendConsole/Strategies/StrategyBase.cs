@@ -23,14 +23,7 @@ namespace _6QuiPrendConsole.Strategies
             Stacks = stacks;
         }
 
-        public void UpdateStack(int stackId, Stack<Card> updatedStack)
-        {
-            Stacks[stackId] = updatedStack;
-        }
-
         public abstract Card GetChosenCard(IEnumerable<GameStack> stacks);
-
-        public abstract int ChoseStack(Card card);
 
         public abstract int GetChosenStack(IEnumerable<GameStack> getCurrentGameState);
     }
