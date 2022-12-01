@@ -10,7 +10,7 @@ namespace _6QuiPrendConsole // Note: actual namespace depends on the project nam
 
             gameService.CreateGame(66);
             var winDictionnary = new Dictionary<Player, int>();
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 var players = gameService.PlayGame();
                 var winner = players.OrderBy(p => p.Score).First();
@@ -19,7 +19,6 @@ namespace _6QuiPrendConsole // Note: actual namespace depends on the project nam
                 else winDictionnary.Add(winner, 1);
             }
 
-            
             foreach (var p in winDictionnary)
             {
                 Console.Write($"{p.Key.Name} won {p.Value} Games \n");

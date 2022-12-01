@@ -25,6 +25,6 @@ namespace _6QuiPrendConsole.Strategies
 
         public abstract Card GetChosenCard(IEnumerable<GameStack> stacks);
 
-        public abstract int GetChosenStack(IEnumerable<GameStack> getCurrentGameState);
+        public abstract int GetBoughtStack(IEnumerable<GameStack> getCurrentGameState);
     }
 }

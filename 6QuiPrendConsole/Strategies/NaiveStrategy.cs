@@ -34,7 +34,7 @@ namespace _6QuiPrendConsole.Strategies
                 .FirstOrDefault();
         }
 
-        public override int GetChosenStack(IEnumerable<GameStack> getCurrentGameState)
+        public override int GetBoughtStack(IEnumerable<GameStack> getCurrentGameState)
         {
             return 1;
         }

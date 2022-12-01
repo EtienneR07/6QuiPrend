@@ -16,8 +16,8 @@ namespace _6QuiPrendConsole
         {
             EndingScore = endingScore;
 
-            Players.Add(new Player("Etienne", new NaiveStrategy(2)));
-            Players.Add(new Player("Etienne 2", new AlexStrategy(2)));
+            Players.Add(new Player("Etienne AI", new NaiveStrategy(2)));
+            Players.Add(new Player("Dumb AI", new NaiveStrategy(2)));
 
             PlayerCardsDictionary = Players.ToDictionary(p => p.Id, p => new List<int>());
         }
@@ -33,7 +33,7 @@ namespace _6QuiPrendConsole
                 if (Players.Any(x => x.Strategy.Cards.Count == 0))
                 {
                     Reset();
-                    GenerateDeck();
+                    Shuffle();
                     DistributeCards();
                     SetupStacks();
                 }
@@ -59,7 +59,7 @@ namespace _6QuiPrendConsole
                     if (CanPlaceCard(playerWithCard))
                         PlaceCard(playerWithCard);
                     else
-                        BuyStack(playerWithCard, playerWithCard.Key.Strategy.GetChosenStack(GetCurrentGameState()));
+                        BuyStack(playerWithCard, playerWithCard.Key.Strategy.GetBoughtStack(GetCurrentGameState()));
                 }
             }
 
@@ -78,7 +78,6 @@ namespace _6QuiPrendConsole
         {
             return Stacks.Select(s => new GameStack(s));
         }
-
 
         private bool CanPlaceCard(KeyValuePair<Player, Card> playerWithCard)
         {
@@ -102,39 +101,9 @@ namespace _6QuiPrendConsole
         }
 
 
-        private void GenerateDeck()
+        private void Shuffle()
         {
-            var deckList = new List<Card>();
-
-            for (var i = 1; i <= 104; i++)
-            {
-                var bullHeads = 1;
-                if (i == 55)
-                {
-                    bullHeads = 7;
-                }
-                else if (SameDigit(i))
-                {
-                    bullHeads = 5;
-                }
-                else if (i % 10 == 0)
-                {
-                    bullHeads = 3;
-                }
-                else if (i % 10 == 5)
-                {
-                    bullHeads = 2;
-                }
-
-                var card = new Card
-                {
-                    Bullheads = bullHeads,
-                    Number = i
-                };
-
-                deckList.Add(card);
-            }
-
+            var deckList = DeckGenerator.GenerateDeck();
             var rng = new Random();
             deckList = deckList.OrderBy(c => rng.Next()).ToList();
             CardDeck = new Stack<Card>(deckList);
