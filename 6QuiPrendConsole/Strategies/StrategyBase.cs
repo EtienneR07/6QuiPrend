@@ -5,26 +5,22 @@ namespace _6QuiPrendConsole.Strategies
     public abstract class StrategyBase
     {
         protected int NumberOfPlayers;
-        public IList<Card> Cards = new List<Card>();
-        protected Dictionary<int, Stack<Card>> Stacks = new();
+        public IList<Card> Hand = new List<Card>();
 
         public StrategyBase(int numberOfPlayers)
         {
             NumberOfPlayers = numberOfPlayers;
         }
 
-        public void ReceiveCards(IList<Card> cards)
+        public virtual void ReceiveHand(IList<Card> cards)
         {
-            Cards = cards;
-        }
-
-        public void ReceiveStacks(Dictionary<int, Stack<Card>> stacks)
-        {
-            Stacks = stacks;
+            Hand = cards;
         }
 
         public abstract Card GetChosenCard(IEnumerable<GameStack> stacks);
 
         public abstract int GetBoughtStack(IEnumerable<GameStack> getCurrentGameState);
+
+        public abstract void NotifyNewGame();
     }
 }

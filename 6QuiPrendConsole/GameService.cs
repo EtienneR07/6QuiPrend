@@ -16,7 +16,7 @@ namespace _6QuiPrendConsole
         {
             EndingScore = endingScore;
 
-            Players.Add(new Player("Etienne AI", new NaiveStrategy(2)));
+            Players.Add(new Player("Etienne AI", new EtienneStrategyLevel1(2)));
             Players.Add(new Player("Dumb AI", new NaiveStrategy(2)));
 
             PlayerCardsDictionary = Players.ToDictionary(p => p.Id, p => new List<int>());
@@ -30,7 +30,7 @@ namespace _6QuiPrendConsole
             }
             while (!HasALoser())
             {
-                if (Players.Any(x => x.Strategy.Cards.Count == 0))
+                if (Players.Any(x => x.Strategy.Hand.Count == 0))
                 {
                     Reset();
                     Shuffle();
@@ -47,7 +47,7 @@ namespace _6QuiPrendConsole
                         || !PlayerCardsDictionary[player.Id].Contains(chosenCard.Number))
                         throw new InvalidOperationException("Chosen card not in player's hand");
 
-                    player.Strategy.Cards.Remove(chosenCard);
+                    player.Strategy.Hand.Remove(chosenCard);
 
                     turnCards.Add(player, chosenCard);
                 }
@@ -81,13 +81,13 @@ namespace _6QuiPrendConsole
 
         private bool CanPlaceCard(KeyValuePair<Player, Card> playerWithCard)
         {
-            return Stacks.Any(s => s.Value.Peek().Number > playerWithCard.Value.Number);
+            return Stacks.Any(s => s.Value.Peek().Number < playerWithCard.Value.Number);
         }
 
         private void PlaceCard(KeyValuePair<Player, Card> playerWithCard)
         {
-            var stackId = Stacks.OrderBy(s => s.Value.Peek().Number)
-                .First(s => s.Value.Peek().Number > playerWithCard.Value.Number)
+            var stackId = Stacks.OrderByDescending(s => s.Value.Peek().Number)
+                .First(s => s.Value.Peek().Number < playerWithCard.Value.Number)
                 .Key;
 
             if (Stacks[stackId].Count == 5)
@@ -109,25 +109,6 @@ namespace _6QuiPrendConsole
             CardDeck = new Stack<Card>(deckList);
         }
 
-        private bool SameDigit(int number)
-        {
-            var lastDigit = number % 10;
-
-            while (number != 0)
-            {
-                var currentDigit = number % 10;
-
-                number /= 10;
-
-                if (currentDigit != lastDigit)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         private bool HasALoser()
         {
             return Players.Any(p => p.Score >= EndingScore);
@@ -144,7 +125,7 @@ namespace _6QuiPrendConsole
                     playerHand.Add(CardDeck.Pop());
                 }
 
-                player.Strategy.ReceiveCards(playerHand);
+                player.Strategy.ReceiveHand(playerHand);
 
                 PlayerCardsDictionary[player.Id] = playerHand.Select(x => x.Number).ToList();
             }
@@ -156,15 +137,14 @@ namespace _6QuiPrendConsole
             Stacks.Add(2, new Stack<Card>(new[] { CardDeck.Pop() }));
             Stacks.Add(3, new Stack<Card>(new[] { CardDeck.Pop() }));
             Stacks.Add(4, new Stack<Card>(new[] { CardDeck.Pop() }));
-
-            foreach (var player in Players)
-            {
-                player.Strategy.ReceiveStacks(new Dictionary<int, Stack<Card>>(Stacks));
-            }
         }
 
         private void Reset()
         {
+            foreach (Player player in Players)
+            {
+                player.Strategy.NotifyNewGame();
+            }
             CardDeck = new Stack<Card>();
             Stacks = new Dictionary<int, Stack<Card>>();
             PlayerCardsDictionary = new Dictionary<Guid, List<int>>();

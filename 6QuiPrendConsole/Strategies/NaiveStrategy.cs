@@ -10,33 +10,18 @@ namespace _6QuiPrendConsole.Strategies
 
         public override Card GetChosenCard(IEnumerable<GameStack> tuples)
         {
-            var chosenCard = Cards.FirstOrDefault();
+            var chosenCard = Hand.FirstOrDefault();
 
             return chosenCard;
-        }
-
-        public virtual int ChoseStack(Card card)
-        {
-            var number = card.Number;
-
-            var topCards = new Dictionary<int, Card>();
-            foreach (var stack in Stacks)
-            {
-                topCards.Add(stack.Key, stack.Value.Peek());
-            }
-
-            if (topCards.All(tc => tc.Value.Number > number)) return 1;
-
-           return topCards
-                .ToDictionary(x => x.Key, x => number - x.Value.Number)
-                .OrderBy(x => x.Value)
-                .Select(x => x.Key)
-                .FirstOrDefault();
         }
 
         public override int GetBoughtStack(IEnumerable<GameStack> getCurrentGameState)
         {
             return 1;
+        }
+
+        public override void NotifyNewGame()
+        {
         }
     }
 }
